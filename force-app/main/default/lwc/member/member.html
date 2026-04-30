@@ -1,0 +1,82 @@
+<template>
+  <lightning-card title="Member">
+    <div class="slds-p-around_medium">
+      <!-- Add Member button -->
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <lightning-button
+          alternative-text="Create new member"
+          label="Create New Member"
+          icon-name="utility:adduser"
+          variant="bare"
+          class="slds-m-center_xx-large"
+          title="Create Member"
+          onclick={openMemberModal}
+        ></lightning-button>
+      </div>
+      <!-- search member input section -->
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <lightning-input
+          type="text"
+          label="search member name"
+          placeholder="Member Name"
+          onchange={handleSearch}
+        >
+        </lightning-input>
+      </div>
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <!-- display Member datatable -->
+        <lightning-datatable
+          key-field="Id"
+          data={displayMember}
+          columns={columns}
+        >
+        </lightning-datatable>
+      </div>
+
+      <!-- modal popup for MEMBERS-FAMILY CREATION -->
+      <template if:true={showModal}>
+        <section
+          role="dialog"
+          tabindex="-1"
+          class="slds-modal slds-fade-in-open"
+        >
+          <div class="slds-modal__container">
+            <!-- Header -->
+            <header class="slds-modal__header">
+              <lightning-button-icon
+                icon-name="utility:close"
+                alternative-text="Close"
+                onclick={closeModal}
+                class="slds-modal__close"
+              >
+              </lightning-button-icon>
+
+              <h2 class="slds-text-heading_medium">Create New Member</h2>
+            </header>
+
+            <!-- Body -->
+            <div class="slds-modal__content slds-p-around_medium">
+              <template if:true={showMemberForm}>
+                <lightning-record-form
+                  object-api-name={Member__c}
+                  fields={Member__c_fields}
+                  onsuccess={handleMemberSuccess}
+                  onerror={handleError}
+                >
+                </lightning-record-form>
+              </template>
+            </div>
+
+            <!-- Footer -->
+            <footer class="slds-modal__footer">
+              <lightning-button label="Close" onclick={closeModal}>
+              </lightning-button>
+            </footer>
+          </div>
+        </section>
+
+        <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+    </div>
+  </lightning-card>
+</template>

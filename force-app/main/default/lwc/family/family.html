@@ -1,0 +1,93 @@
+<template>
+  <lightning-card title="Family">
+    <div class="slds-p-around_medium">
+      <!-- Add Family button -->
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <lightning-button
+          alternative-text="Create New Family"
+          label="Create New Family"
+          icon-name="utility:adduser"
+          variant="bare"
+          class="slds-m-center_xx-large"
+          title="Create Family"
+          onclick={openFamilyModal}
+        ></lightning-button>
+      </div>
+      <!-- search family input section -->
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <lightning-input
+          type="text"
+          label="search family name"
+          placeholder="Family Name"
+          onchange={handleSearch}
+        >
+        </lightning-input>
+      </div>
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <!-- display family datatable -->
+        <lightning-datatable
+          key-field="Id"
+          data={displayFamily}
+          columns={columns}
+          onrowaction={handleFamilyRowAction}
+        >
+        </lightning-datatable>
+      </div>
+      <!-- modal popup for MEMBERS-FAMILY CREATION -->
+      <template if:true={showModal}>
+        <section
+          role="dialog"
+          tabindex="-1"
+          class="slds-modal slds-fade-in-open"
+        >
+          <div class="slds-modal__container">
+            <!-- Header -->
+            <header class="slds-modal__header">
+              <lightning-button-icon
+                icon-name="utility:close"
+                alternative-text="Close"
+                onclick={closeModal}
+                class="slds-modal__close"
+              >
+              </lightning-button-icon>
+
+              <h2 class="slds-text-heading_medium">{modalTitle}</h2>
+            </header>
+
+            <!-- Body -->
+            <div class="slds-modal__content slds-p-around_medium">
+              <template if:true={showMemberCreationForm}>
+                <lightning-record-form
+                  object-api-name={Member__c}
+                  fields={Member__c_fields}
+                  onsuccess={handleMemberSuccess}
+                  onerror={handleError}
+                >
+                </lightning-record-form>
+              </template>
+
+              <!-- Family creation form  -->
+              <template if:true={showFamilyCreationForm}>
+                <lightning-record-form
+                  object-api-name={Family__c}
+                  fields={Family__c_fields}
+                  onsuccess={handleFamilySuccess}
+                  onerror={handleError}
+                >
+                </lightning-record-form>
+              </template>
+            </div>
+
+            <!-- Footer -->
+            <footer class="slds-modal__footer">
+              <lightning-button label="Close" onclick={closeModal}>
+              </lightning-button>
+            </footer>
+          </div>
+        </section>
+
+        <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+    </div>
+  </lightning-card>
+</template>
