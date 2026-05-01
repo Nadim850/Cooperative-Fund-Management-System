@@ -87,6 +87,7 @@
 
             <!-- Body -->
             <div class="slds-modal__content slds-p-around_medium">
+              <!-- create new member form -->
               <template if:true={showMemberForm}>
                 <lightning-record-form
                   object-api-name={Member__c}
@@ -96,6 +97,7 @@
                 >
                 </lightning-record-form>
               </template>
+              <!-- show member detail form -->
               <template if:true={showMemberDetail}>
                 <lightning-record-view-form
                   record-id={selectedMemberId}

@@ -12,8 +12,7 @@ import MEMBER_OBJECT from "@salesforce/schema/Member__c";
 import MEMBER_NAME from "@salesforce/schema/Member__c.Name";
 import MEMBER_ADDRESS from "@salesforce/schema/Member__c.Address__c";
 import MEMBER_PHONE from "@salesforce/schema/Member__c.Phone__c";
-import MEMBER_EMAIL from "@salesforce/schema/Member__c.Family__c";
-import MEMBER_CONTRIBUTION from "@salesforce/schema/Member__c.Family__c";
+import MEMBER_EMAIL from "@salesforce/schema/Member__c.Email__c";
 import FAMILY_FIELD from "@salesforce/schema/Member__c.Family__c";
 
 const COLUMNS = [
@@ -65,9 +64,8 @@ export default class Member extends LightningElement {
   Member__c_fields = [
     MEMBER_NAME,
     MEMBER_EMAIL,
-    MEMBER_ADDRESS,
     MEMBER_PHONE,
-    MEMBER_CONTRIBUTION,
+    MEMBER_ADDRESS,
     FAMILY_FIELD
   ];
 
