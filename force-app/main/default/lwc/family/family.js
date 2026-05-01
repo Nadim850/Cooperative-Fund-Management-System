@@ -134,21 +134,23 @@ export default class Family extends LightningElement {
   handleFamilySuccess(event) {
     this.showModal = false;
     refreshApex(this.wiredFamiliesResult);
+
     this.showToast(
       "Family created",
       "Record Id: ",
       +event.detail.id,
-      "success"
+      "warning"
     );
   }
   handleMemberSuccess(event) {
     this.showModal = false;
-    this.showToast(
-      "Member created",
-      "Record Id: ",
-      +event.detail.id,
-      "success"
-    );
+    console.log("event object: " + event);
+    // this.showToast(
+    //   "Member created",
+    //   "Record Id: ",
+    //   +event.detail.id,
+    //   "success"
+    // );
   }
 
   get displayFamily() {
@@ -181,7 +183,7 @@ export default class Family extends LightningElement {
   handleError(event) {
     console.log("Error:", JSON.stringify(event.detail));
 
-    this.showToast("Error creating record", event.detail.message, "error");
+    //this.showToast("Error creating record", event.detail.message, "error");
   }
   handleFamilyRowAction(event) {
     const actionName = event.detail.action.name;

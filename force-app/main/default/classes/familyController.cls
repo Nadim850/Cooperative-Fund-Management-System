@@ -1,4 +1,4 @@
-public with sharing class controller {
+public with sharing class familyController {
   @AuraEnabled(cacheable=true)
   public static List<Family__c> FindFamily(String key) {
     String Query = '%' + key + '%';
