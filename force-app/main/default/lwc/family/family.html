@@ -23,6 +23,23 @@
         >
         </lightning-input>
       </div>
+      <!-- delete multiple Family button -->
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <template if:false={showDeleteButton}>
+          <lightning-button
+            label="Delete Selected"
+            onclick={handleDeleteSelected}
+            variant="bare"
+            class="slds-m-center_xx-large"
+            title="Delete All"
+            icon-name="utility:delete"
+            key-field="Id"
+          >
+          </lightning-button>
+        </template>
+      </div>
+      <!-- families list -->
+
       <div class="slds-m-top_large slds-m-bottom_large">
         <!-- display family datatable -->
         <lightning-datatable
@@ -30,9 +47,11 @@
           data={displayFamily}
           columns={columns}
           onrowaction={handleFamilyRowAction}
+          onrowselection={handleRowSelection}
         >
         </lightning-datatable>
       </div>
+
       <!-- modal popup for MEMBERS-FAMILY CREATION -->
       <template if:true={showModal}>
         <section
@@ -55,8 +74,9 @@
             </header>
 
             <!-- Body -->
+            <!-- Member creation form  -->
             <div class="slds-modal__content slds-p-around_medium">
-              <template if:true={showMemberCreationForm}>
+              <!-- <template if:true={showMemberCreationForm}>
                 <lightning-record-form
                   object-api-name={Member__c}
                   fields={Member__c_fields}
@@ -64,6 +84,26 @@
                   onerror={handleError}
                 >
                 </lightning-record-form>
+              </template> -->
+              <template if:true={showMemberCreationForm}>
+                <lightning-record-edit-form object-api-name={Member__c}>
+                  <lightning-input-field
+                    field-name="Name"
+                  ></lightning-input-field>
+                  <lightning-input-field
+                    field-name="Email__c"
+                  ></lightning-input-field>
+                  <lightning-input-field
+                    field-name="Phone__c"
+                  ></lightning-input-field>
+                  <lightning-input-field
+                    field-name="Address__c"
+                  ></lightning-input-field>
+                  <lightning-input-field
+                    field-name="Family__c"
+                    value={selectedFamilyId}
+                  ></lightning-input-field>
+                </lightning-record-edit-form>
               </template>
 
               <!-- Family creation form  -->
@@ -75,6 +115,17 @@
                   onerror={handleError}
                 >
                 </lightning-record-form>
+              </template>
+              <!-- View Members table popup -->
+              <template if:true={showMemberTable}>
+                <div class="slds-m-top_large slds-m-bottom_large">
+                  <lightning-datatable
+                    key-field="Id"
+                    columns={member_columns}
+                    data={filteredMembers}
+                  >
+                  </lightning-datatable>
+                </div>
               </template>
             </div>
 
