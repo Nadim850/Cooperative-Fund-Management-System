@@ -1,1 +1,96 @@
-<template> </template>
+<template>
+  <lightning-card title="Transaction">
+    <div class="slds-p-around_medium">
+      <!-- Add member button -->
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <lightning-button
+          alternative-text="Create new transaction"
+          label="Create Transaction"
+          icon-name="utility:add"
+          variant="bare"
+          class="slds-m-center_xx-large"
+          onclick={openTransactionModal}
+          title="Create New Transaction"
+        >
+        </lightning-button>
+      </div>
+      <!-- display Member datatable -->
+      <div class="slds-m-top_large slds-m-bottom_large">
+        <lightning-datatable
+          key-field="Id"
+          data={displayTransactions}
+          columns={columns}
+        >
+        </lightning-datatable>
+      </div>
+      <!-- modal popup for transaction -->
+      <template if:true={showModal}>
+        <section
+          role="dialog"
+          tabindex="-1"
+          class="slds-modal slds-fade-in-open"
+        >
+          <div class="slds-modal__container">
+            <!-- Header -->
+            <header class="slds-modal__header">
+              <lightning-button-icon
+                icon-name="utility:close"
+                alternative-text="Close"
+                onclick={closeModal}
+                class="slds-modal__close"
+              >
+              </lightning-button-icon>
+
+              <h2 class="slds-text-heading_medium">{modalTitle}</h2>
+            </header>
+
+            <!-- Body -->
+            <div class="slds-modal__content slds-p-around_medium">
+              <!-- create new member form -->
+              <template if:true={showTransactionForm}>
+                <lightning-record-form
+                  object-api-name={Transaction__c}
+                  fields={Transaction__c_fields}
+                  onsuccess={handleTransactionSuccess}
+                  onerror={handleError}
+                >
+                </lightning-record-form>
+              </template>
+              <!-- show member detail form -->
+              <!-- <template if:true={showTransactionDetail}>
+                <lightning-record-view-form
+                  record-id={selectedMemberId}
+                  object-api-name="Member__c"
+                >
+                  <lightning-output-field
+                    field-name="Name"
+                  ></lightning-output-field>
+                  <lightning-output-field
+                    field-name="Email__c"
+                  ></lightning-output-field>
+                  <lightning-output-field
+                    field-name="Phone__c"
+                  ></lightning-output-field>
+                  <lightning-output-field
+                    field-name="Address__c"
+                  ></lightning-output-field>
+                  <lightning-output-field
+                    field-name="Contribution__c"
+                  ></lightning-output-field>
+                </lightning-record-view-form>
+              </template> -->
+            </div>
+
+            <!-- Footer -->
+            <footer class="slds-modal__footer">
+              <lightning-button label="Close" onclick={closeModal}>
+              </lightning-button>
+            </footer>
+          </div>
+        </section>
+
+        <div class="slds-backdrop slds-backdrop_open"></div>
+      </template>
+    </div>
+  </lightning-card>
+</template>

@@ -1,0 +1,17 @@
+.nav-container {
+  display: flex;
+  gap: 20px;
+  background: #f3f3f3;
+  border-radius: 10px;
+}
+
+.nav-item {
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 20px;
+}
+
+.nav-item:hover {
+  background: #0176d3;
+  color: white;
+}

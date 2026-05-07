@@ -17,38 +17,6 @@ import FAMILY_FIELD from "@salesforce/schema/Member__c.Family__c";
 
 const COLUMNS = [
   { label: "Name", fieldName: "Name", type: "text" },
-  // view member column
-  // {
-  //   label: "View Member",
-  //   type: "button-icon",
-
-  //   initialWidth: 100,
-
-  //   typeAttributes: {
-  //     iconName: "utility:down",
-  //     name: "view_member",
-  //     //variant: "bare",
-  //     size: "medium",
-  //     alternativeText: "View Member",
-  //     class: "slds-m-left_xx-small"
-  //   }
-  // },
-  // dlt member column
-  // {
-  //   label: "Delete Member",
-  //   type: "button-icon",
-
-  //   initialWidth: 100,
-
-  //   typeAttributes: {
-  //     iconName: "utility:delete",
-  //     name: "delete_member",
-  //     //variant: "bare",
-  //     size: "medium",
-  //     alternativeText: "Delete Member",
-  //     class: "slds-m-left_xx-small"
-  //   }
-  // },
   {
     type: "action",
     typeAttributes: {
@@ -90,6 +58,7 @@ export default class Member extends LightningElement {
   showMemberDetail = false;
   modalTitle = "";
   isLoading = false;
+  showFamilyTable = true;
 
   @wire(getMember)
   wiredMembers(result) {
@@ -123,14 +92,10 @@ export default class Member extends LightningElement {
     }
     this.key = value;
   }
-  handleMemberSuccess(event) {
+  handleMemberSuccess() {
     this.showModal = false;
     refreshApex(this.wiredMembersResult);
-    this.showToast(
-      "Member Created",
-      "Record Id: " + event.detail.id,
-      "success"
-    );
+    this.showToast("Success", "Member Created Successfully", "success");
   }
   get showDeleteButton() {
     return !this.selectedMemberId || this.selectedMemberId.length === 0;
@@ -155,7 +120,7 @@ export default class Member extends LightningElement {
 
     try {
       const result = await delMultiMember({ memberIds: this.selectedMemberId });
-      this.showToast("success", result, "success");
+      this.showToast("Success", result, "success");
       await refreshApex(this.wiredMembersResult);
       this.selectedMemberId = [];
     } catch (error) {
@@ -218,32 +183,6 @@ export default class Member extends LightningElement {
     const actionName = event.detail.action.name;
     const row = event.detail.row;
 
-    if (actionName === "delete_member") {
-      //confirmation before deleting
-      await LightningConfirm.open({
-        message: `Are you sure you want to delete ${row.Name} From Members`,
-        variant: "header",
-        label: "Confirm Deletion"
-      })
-        .then((result) => {
-          //only if user click okay
-          if (result) {
-            delMember({ memberId: row.Id }).then(() => {
-              this.allMembers = this.allMembers.filter(
-                (acc) => acc.Id !== row.Id
-              );
-              this.showToast(
-                "Deleted",
-                "Member Deleted successfully",
-                "success"
-              );
-            });
-          }
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-    }
     switch (actionName) {
       case "view_member":
         this.handleView(row);
