@@ -13,9 +13,8 @@ public with sharing class familyController {
 
   @AuraEnabled(cacheable=true)
   public static List<Family__c> getFamily() {
-    return [SELECT Name, Id, Member__c FROM Family__c];
+    return [SELECT Id, Name, Head__c, Head__r.Name FROM Family__c];
   }
-
   @AuraEnabled
   public static void delFamily(String familyId) {
     try {
@@ -54,5 +53,35 @@ public with sharing class familyController {
       FROM Member__c
       WHERE Family__c = :familyId
     ];
+  }
+
+  @AuraEnabled
+  public static void createFamilyWithHead(
+    String familyName,
+    String headName,
+    String headEmail,
+    String headPhone,
+    String headAddress
+  ) {
+    //create family
+    Family__c fam = new Family__c(Name = familyName);
+    System.debug('before family insert');
+    insert fam;
+
+    //create head member
+
+    Member__c head = new Member__c(
+      Name = headName,
+      Email__c = headEmail,
+      Phone__c = headPhone,
+      Address__c = headAddress,
+      Family__c = fam.Id,
+      Role__c = 'Head'
+    );
+    System.debug('before head insert');
+    insert head;
+    //store head directly in family
+    fam.Head__c = head.Id;
+    update fam;
   }
 }
