@@ -8,6 +8,7 @@ import getFamily from "@salesforce/apex/familyController.getFamily";
 import delFamily from "@salesforce/apex/familyController.delFamily";
 import delMultiFamilies from "@salesforce/apex/familyController.delMultiFamilies";
 import getMembersByFamilyId from "@salesforce/apex/familyController.getMembersByFamilyId";
+import createFamilyWithHead from "@salesforce/apex/familyController.createFamilyWithHead";
 
 import FAMILY_OBJECT from "@salesforce/schema/Family__c";
 import NAME_FIELD from "@salesforce/schema/Family__c.Name";
@@ -22,13 +23,15 @@ import FAMILY_FIELD from "@salesforce/schema/Member__c.Family__c";
 
 const COLUMNS = [
   { label: "Family Name", fieldName: "Name", type: "text" },
+  { label: "Head", fieldName: "headName", type: "text" },
   {
     type: "action",
     typeAttributes: {
       rowActions: [
         { label: "View Members", name: "view_members" },
         { label: "Delete", name: "delete" },
-        { label: "Add Member", name: "add_member" }
+        { label: "Add Member", name: "add_member" },
+        { label: "Edit Family", name: "edit_family" }
       ]
     }
   }
@@ -65,8 +68,33 @@ export default class Family extends LightningElement {
   allFamilies = [];
   showFamilyCreationForm = false;
   showMemberCreationForm = false;
-
+  showFamilyEditForm = false;
+  showMemberEditFrom = false;
   showModal = false;
+  isSaving = false;
+
+  //Head logic
+  familyName = "";
+  headName = "";
+  headEmail = "";
+  headPhone = "";
+  headAddress = "";
+
+  handleFamilyName(e) {
+    this.familyName = e.target.value;
+  }
+  handleHeadName(e) {
+    this.headName = e.target.value;
+  }
+  handleHeadEmail(e) {
+    this.headEmail = e.target.value;
+  }
+  handleHeadPhone(e) {
+    this.headPhone = e.target.value;
+  }
+  handleHeadAddress(e) {
+    this.headAddress = e.target.value;
+  }
 
   @wire(FindFamily, { key: "$key" })
   wiredSearch({ data }) {
@@ -79,7 +107,14 @@ export default class Family extends LightningElement {
   wiredFamilies(result) {
     this.wiredFamiliesResult = result;
     if (result.data) {
-      this.allFamilies = result.data;
+      console.log(JSON.stringify(result.data));
+      this.allFamilies = result.data.map((item) => {
+        return {
+          Id: item.Id,
+          Name: item.Name,
+          headName: item.Head__r ? item.Head__r.Name : ""
+        };
+      });
     }
   }
 
@@ -93,25 +128,15 @@ export default class Family extends LightningElement {
     }
     this.key = value;
   }
-  handleFamilySuccess(event) {
+  handleFamilySuccess() {
+    this.showFamilyCreationForm = false;
     this.showModal = false;
     refreshApex(this.wiredFamiliesResult);
-    this.showToast(
-      "Family created",
-      "Record Id: ",
-      +event.detail.id,
-      "warning"
-    );
+    this.showToast("Success", "Family created successfull", "success");
   }
-  handleMemberSuccess(event) {
+  handleMemberSuccess() {
     this.showModal = false;
-    console.log("event object: " + event);
-    // this.showToast(
-    //   "Member created",
-    //   "Record Id: ",
-    //   +event.detail.id,
-    //   "success"
-    // );
+    this.showToast("Success", "Member Addedd Successfull ", "success");
   }
 
   get displayFamily() {
@@ -150,6 +175,7 @@ export default class Family extends LightningElement {
     this.showFamilyCreationForm = false;
     this.selectedFamilyId = row.Id;
     this.openMemberModal();
+    this.showDeleteButton = false;
   }
 
   async handleView(row) {
@@ -211,6 +237,7 @@ export default class Family extends LightningElement {
         console.log(error);
       });
   }
+  async handleEdit(row) {}
   get showDeleteButton() {
     return !this.selectedFamilyId || this.selectedFamilyId.length === 0;
   }
@@ -228,6 +255,9 @@ export default class Family extends LightningElement {
         break;
       case "add_member":
         this.handleAdd(row);
+        break;
+      case "edit_family":
+        this.handleEdit(row);
         break;
       default:
     }
@@ -270,5 +300,37 @@ export default class Family extends LightningElement {
     console.log("Selected Rows: " + event.detail.selectedRows);
     this.selectedFamilyId = event.detail.selectedRows.map((row) => row.Id);
     console.log("Selected IDs:", [...this.selectedFamilyId]);
+  }
+  async handleSave() {
+    if (
+      !this.familyName ||
+      !this.headName ||
+      !this.headEmail ||
+      !this.headPhone ||
+      !this.headAddress
+    ) {
+      this.showToast("Error", "Please fill required fields", "error");
+      return;
+    }
+
+    try {
+      await createFamilyWithHead({
+        familyName: this.familyName,
+        headName: this.headName,
+        headEmail: this.headEmail,
+        headPhone: this.headPhone,
+        headAddress: this.headAddress
+      });
+      this.showToast("Success", "Famiy & Head created", "success");
+      await refreshApex(this.wiredFamiliesResult);
+      this.showFamilyCreationForm = false;
+    } catch (error) {
+      console.log(JSON.stringify(error));
+      const message =
+        error?.body?.pageErrors?.[0]?.message ||
+        error?.body?.message ||
+        "Unknown Error";
+      this.showToast("Error", message, "error");
+    }
   }
 }
