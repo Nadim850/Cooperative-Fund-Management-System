@@ -1,11 +1,23 @@
 public with sharing class transactionController {
-  @AuraEnabled
-  public static List<Transaction__c> getTransactions() {
+  @AuraEnabled(cacheable=true)
+  public static List<Transaction__c> getTransactions(Id memberId) {
     return [
-      SELECT Name, Month__c, Type__c, Member__c, Amount__c, Payment_Date__c
+      SELECT Type__c, Member__c, Amount__c, Payment_Date__c
       FROM Transaction__c
-      ORDER BY CreatedDate ASC
-      LIMIT 100
+      WHERE Member__c = :memberId
+      ORDER BY Payment_Date__c DESC
+    ];
+  }
+
+  @AuraEnabled
+  public static void addTransaction(Transaction__c transactionRec) {
+  }
+  @AuraEnabled
+  public static void deleteTransaction(Id transactionId) {
+    delete [
+      SELECT Id
+      FROM transaction__c
+      WHERE Id = :transactionId
     ];
   }
 }

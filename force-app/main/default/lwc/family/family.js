@@ -9,9 +9,11 @@ import delFamily from "@salesforce/apex/familyController.delFamily";
 import delMultiFamilies from "@salesforce/apex/familyController.delMultiFamilies";
 import getMembersByFamilyId from "@salesforce/apex/familyController.getMembersByFamilyId";
 import createFamilyWithHead from "@salesforce/apex/familyController.createFamilyWithHead";
+import getTransactions from "@salesforce/apex/transactionController.getTransactions";
 
 import FAMILY_OBJECT from "@salesforce/schema/Family__c";
 import NAME_FIELD from "@salesforce/schema/Family__c.Name";
+import TRANSACTION_OBJECT from "@salesforce/schema/Transaction__c";
 //import HEAD_FIELD from "@salesforce/schema/Family__c.Head__c";
 //import MEMBER_FIELD from "@salesforce/schema/Family__c.Member__r.Name";
 
@@ -39,9 +41,25 @@ const COLUMNS = [
 
 const MEMBER_TABLE = [
   { label: "Name", fieldName: "Name", type: "text" },
-  { label: "Email", fieldName: "Email__c", type: "email" }
+  { label: "Email", fieldName: "Email__c", type: "email" },
+  {
+    type: "action",
+    typeAttributes: {
+      rowActions: [
+        { label: "View ", name: "view_member" },
+        { label: "Delete", name: "delete_member" },
+        { label: "Add Transaction", name: "add_transaction" },
+        { label: "Show Transaction", name: "show_transaction" }
+      ]
+    }
+  }
 ];
-
+const TRANSACTION_COLUMNS = [
+  { label: "Amount", fieldName: "Amount__c", type: "currency" },
+  { label: "Type", fieldName: "Type__c", type: "text" },
+  { label: "Status", fieldName: "Status__c", type: "text" },
+  { label: "Payment Date", fieldName: "Payment_Date__c", type: "date" }
+];
 export default class Family extends LightningElement {
   //toast helper method
   showToast(title, message, variant) {
@@ -53,7 +71,7 @@ export default class Family extends LightningElement {
       })
     );
   }
-
+  TRANSACTION_COLUMNS = TRANSACTION_COLUMNS;
   Family__c = FAMILY_OBJECT;
   Family__c_fields = [NAME_FIELD];
   Member__c = MEMBER_OBJECT;
@@ -72,6 +90,11 @@ export default class Family extends LightningElement {
   showMemberEditFrom = false;
   showModal = false;
   isSaving = false;
+  memberOptions = [];
+  selectedHeadId;
+  addTransactionForm = false;
+  showTransactionTable = false;
+  transactions = [];
 
   //Head logic
   familyName = "";
@@ -184,6 +207,8 @@ export default class Family extends LightningElement {
     this.filteredMembers = [];
     this.showMemberTable = false;
     this.showMemberCreationForm = false;
+    this.showFamilyEditForm = false;
+    this.addTransactionForm = false;
     this.showModal = false;
 
     try {
@@ -195,6 +220,7 @@ export default class Family extends LightningElement {
 
       if (result.length > 0) {
         this.modalTitle = "Members";
+        this.showFamilyEditForm = false;
         this.showMemberTable = true;
         this.showModal = true;
       } else {
@@ -237,7 +263,46 @@ export default class Family extends LightningElement {
         console.log(error);
       });
   }
-  async handleEdit(row) {}
+  async handleEdit(row) {
+    this.selectedFamilyId = row.Id;
+    this.selectedHeadId = row.Head__c;
+    this.addTransactionForm = false;
+
+    const result = await getMembersByFamilyId({
+      familyId: row.Id
+    });
+
+    this.memberOptions = result.map((member) => ({
+      label: member.Name,
+      value: member.Id
+    }));
+    this.showModal = true;
+    this.showFamilyEditForm = true;
+    this.modalTitle = "Edit Family";
+  }
+  handleFamilyUpdateSuccess() {
+    this.showToast("Success", "Family updated successfully", "success");
+    this.showFamilyEditForm = false;
+    this.showModal = false;
+    refreshApex(this.wiredFamiliesResult);
+  }
+  handleCloseFamilyEdit() {
+    this.showModal = false;
+    this.showFamilyEditForm = false;
+  }
+
+  handleHeadChange(event) {
+    this.selectedHeadId = event.detail.value;
+  }
+  handleFamilySubmit(event) {
+    event.preventDefault();
+
+    const fields = event.detail.fields;
+
+    fields.Head__c = this.selectedHeadId;
+
+    this.template.querySelector("lightning-record-edit-form").submit(fields);
+  }
   get showDeleteButton() {
     return !this.selectedFamilyId || this.selectedFamilyId.length === 0;
   }
@@ -332,5 +397,72 @@ export default class Family extends LightningElement {
         "Unknown Error";
       this.showToast("Error", message, "error");
     }
+  }
+
+  async handleMemberRowAction(event) {
+    const actionName = event.detail.action.name;
+    const row = event.detail.row;
+
+    switch (actionName) {
+      case "view_member":
+        this.handleView(row);
+        break;
+      case "delete_member":
+        this.handleDelete(row);
+        break;
+      case "add_transaction":
+        console.log(actionName);
+        this.handleAddTransactions(row);
+        break;
+      case "show_transaction":
+        console.log(actionName);
+        this.handleShowTransactions(row);
+        break;
+
+      default:
+    }
+  }
+  handleAddTransactions(row) {
+    this.modalTitle = "Add Transaction";
+    this.selectedMemberId = row.Id;
+    this.showModal = true;
+    this.addTransactionForm = true;
+    this.showMemberTable = false;
+    console.log("add transaction clicked");
+  }
+
+  async handleShowTransactions(row) {
+    this.modalTitle = "Transaction";
+    this.selectedMemberId = row.Id;
+    this.showModal = true;
+    this.addTransactionForm = false;
+    this.showTransactionTable = true;
+    this.showMemberTable = false;
+    try {
+      this.selectedMemberId = row.Id;
+
+      this.transactions = await getTransactions({
+        memberId: row.Id
+      });
+
+      this.showTransactionTable = true;
+
+      console.log(this.transactions);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  handleTransactionSuccess() {
+    console.log("Transaction Created");
+
+    this.showModal = false;
+    this.addTransactionForm = false;
+
+    this.showToast("Success", "Transaction Added Successfully", "success");
+  }
+
+  handleSubmit() {
+    console.log("submitting...");
   }
 }

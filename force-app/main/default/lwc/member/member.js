@@ -22,7 +22,9 @@ const COLUMNS = [
     typeAttributes: {
       rowActions: [
         { label: "View", name: "view_member" },
-        { label: "Delete", name: "delete_member" }
+        { label: "Delete", name: "delete_member" },
+        { label: "View Transactions", name: "view_transactions" },
+        { label: "Add Transaction", name: "add_transaction" }
       ]
     }
   }
@@ -59,6 +61,7 @@ export default class Member extends LightningElement {
   modalTitle = "";
   isLoading = false;
   showFamilyTable = true;
+  addTransactionForm = false;
 
   @wire(getMember)
   wiredMembers(result) {
@@ -174,6 +177,16 @@ export default class Member extends LightningElement {
     this.showMemberForm = false;
     this.showMemberDetail = true;
   }
+  handleAddTransactions(row) {
+    this.modalTitle = "Add Transaction";
+    this.selectedMemberId = row.Id;
+    this.showModal = true;
+    this.addTransactionForm = true;
+  }
+  handleViewTransactions(row) {
+    this.selectedMemberId = row.Id;
+    this.showTransaction = true;
+  }
   handleRowSelection(event) {
     console.log("Selected Rows: " + event.detail.selectedRows);
     this.selectedMemberId = event.detail.selectedRows.map((row) => row.Id);
@@ -189,6 +202,12 @@ export default class Member extends LightningElement {
         break;
       case "delete_member":
         this.handleDelete(row);
+        break;
+      case "view_transactions":
+        this.handleViewTransactions(row);
+        break;
+      case "add_transaction":
+        this.handleAddTransactions(row);
         break;
 
       default:

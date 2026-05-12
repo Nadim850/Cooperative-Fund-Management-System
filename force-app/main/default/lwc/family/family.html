@@ -1,5 +1,5 @@
 <template>
-  <lightning-card title="Family">
+  <lightning-card title="Family Dashboard">
     <div class="slds-p-around_medium">
       <!-- Add Family button -->
       <div class="slds-m-top_large slds-m-bottom_large">
@@ -74,7 +74,6 @@
             </header>
 
             <!-- Body -->
-            <!-- Member creation form  -->
             <div class="slds-modal__content slds-p-around_medium">
               <!-- Member creation form  -->
               <template if:true={showMemberCreationForm}>
@@ -107,9 +106,7 @@
                   ></lightning-button>
                 </lightning-record-edit-form>
               </template>
-
               <!-- Family creation form  -->
-
               <template if:true={showFamilyCreationForm}>
                 <lightning-input
                   label="Family Name"
@@ -147,6 +144,39 @@
                   onclick={handleSave}
                 ></lightning-button>
               </template>
+              <!-- Family edit form  -->
+              <template if:true={showFamilyEditForm}>
+                <lightning-record-edit-form
+                  object-api-name="Family__c"
+                  record-id={selectedFamilyId}
+                  onsuccess={handleFamilyUpdateSuccess}
+                  onsubmit={handleFamilySubmit}
+                >
+                  <lightning-input-field
+                    field-name="Name"
+                  ></lightning-input-field>
+
+                  <lightning-combobox
+                    label="Family Head"
+                    value={selectedHeadId}
+                    options={memberOptions}
+                    onchange={handleHeadChange}
+                  ></lightning-combobox>
+
+                  <div class="slds-m-top_large">
+                    <lightning-button
+                      type="submit"
+                      label="Update"
+                      variant="Neutral"
+                    ></lightning-button>
+                    <lightning-button
+                      class="slds-m-left_small"
+                      label="cancel"
+                      onclick={handleCloseFamilyEdit}
+                    ></lightning-button>
+                  </div>
+                </lightning-record-edit-form>
+              </template>
               <!-- View Members table popup -->
               <template if:true={showMemberTable}>
                 <div class="slds-m-top_large slds-m-bottom_large">
@@ -154,9 +184,52 @@
                     key-field="Id"
                     columns={member_columns}
                     data={filteredMembers}
+                    onrowaction={handleMemberRowAction}
                   >
                   </lightning-datatable>
                 </div>
+              </template>
+              <!-- view add transaction popup -->
+              <template if:true={addTransactionForm}>
+                <lightning-record-edit-form
+                  object-api-name="Transaction__c"
+                  onsuccess={handleTransactionSuccess}
+                  onsubmit={handleSubmit}
+                >
+                  <lightning-input-field field-name="Amount__c">
+                  </lightning-input-field>
+                  <lightning-input-field field-name="Type__c">
+                  </lightning-input-field>
+                  <lightning-input-field field-name="Status__c">
+                  </lightning-input-field>
+                  <lightning-input-field field-name="Payment_Date__c">
+                  </lightning-input-field>
+                  <lightning-input-field
+                    field-name="Member__c"
+                    value={selectedMemberId}
+                  >
+                  </lightning-input-field>
+                  <div class="slds-m-top_medium">
+                    <lightning-button
+                      type="submit"
+                      label="save"
+                      variant="brand"
+                    ></lightning-button>
+                    <lightning-button
+                      label="cancel"
+                      onclick={handleCloseTransactionModal}
+                    ></lightning-button>
+                  </div>
+                </lightning-record-edit-form>
+              </template>
+              <!-- show transaction table -->
+              <template if:true={showTransactionTable}>
+                <lightning-datatable
+                  data={transactions}
+                  columns={TRANSACTION_COLUMNS}
+                  key-field="Id"
+                >
+                </lightning-datatable>
               </template>
             </div>
 
