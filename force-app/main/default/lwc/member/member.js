@@ -5,7 +5,8 @@ import LightningConfirm from "lightning/confirm";
 
 import getMember from "@salesforce/apex/memberController.getMember";
 import findMember from "@salesforce/apex/memberController.findMember";
-import checkMonthlyContribution from "@salesforce/apex/memberController.checkMonthlyContribution";
+import checkMonthlyContributions from "@salesforce/apex/memberController.checkMonthlyContributions";
+import updateLastContributionDate from "@salesforce/apex/transactionController.updateLastContributionDate";
 
 import delMember from "@salesforce/apex/memberController.delMember";
 import delMultiMember from "@salesforce/apex/memberController.delMultiMember";
@@ -108,6 +109,7 @@ export default class Member extends LightningElement {
     const count = this.selectedMemberId?.length || 0;
     if (!this.selectedMemberId || this.selectedMemberId.length === 0) {
       this.showToast("Error", "No Member selected", "error");
+      this.showDeleteButton = false;
       return;
     }
     //confrimation before deleting
@@ -132,6 +134,7 @@ export default class Member extends LightningElement {
         error?.body?.message || error?.message || "Unknown error occured";
       this.showToast("Error", msg, "error");
     } finally {
+      this.showDeleteButton = false;
       this.isLoading = false;
     }
   }
@@ -177,12 +180,14 @@ export default class Member extends LightningElement {
     this.showModal = true;
     this.showMemberForm = false;
     this.showMemberDetail = true;
+    this.addTransactionForm = true;
   }
   handleAddTransactions(row) {
     this.modalTitle = "Add Transaction";
     this.selectedMemberId = row.Id;
     this.showModal = true;
     this.addTransactionForm = true;
+    this.showMemberDetail = false;
   }
   handleViewTransactions(row) {
     this.selectedMemberId = row.Id;
@@ -213,5 +218,41 @@ export default class Member extends LightningElement {
 
       default:
     }
+  }
+  async handleTransactionSubmit(event) {
+    event.preventDefault();
+    const fields = event.detail.fields;
+
+    //check only contribution
+
+    if (fields.Type__c === "Contribution") {
+      try {
+        const alreadyContributed = await checkMonthlyContributions({
+          memberId: this.selectedMemberId
+        });
+        if (alreadyContributed) {
+          this.showToast(
+            "Error",
+            "Member already contributed this month",
+            "error"
+          );
+          return;
+        }
+      } catch (error) {
+        console.error(error);
+        console.log("Error:", JSON.stringify(event.detail));
+        return;
+      }
+    }
+    this.template.querySelector("lightning-record-edit-form").submit(fields);
+  }
+  async handleTransactionSuccess() {
+    await updateLastContributionDate({
+      memberId: this.selectedMemberId
+    });
+    console.log("Transaction Created");
+    this.showModal = false;
+    this.addTransactionForm = false;
+    this.showToast("Success", "Transaction Added Successfully", "success");
   }
 }

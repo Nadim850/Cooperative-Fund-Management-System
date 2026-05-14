@@ -10,14 +10,19 @@ public with sharing class transactionController {
   }
 
   @AuraEnabled
-  public static void addTransaction(Transaction__c transactionRec) {
-  }
-  @AuraEnabled
   public static void deleteTransaction(Id transactionId) {
     delete [
       SELECT Id
       FROM transaction__c
       WHERE Id = :transactionId
     ];
+  }
+  @AuraEnabled
+  public static void updateLastContributionDate(Id memberId) {
+    Member__c member = new Member__c(
+      Id = memberId,
+      CreatedDate = System.today()
+    );
+    update member;
   }
 }

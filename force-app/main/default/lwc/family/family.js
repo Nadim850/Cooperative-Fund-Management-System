@@ -10,6 +10,8 @@ import delMultiFamilies from "@salesforce/apex/familyController.delMultiFamilies
 import getMembersByFamilyId from "@salesforce/apex/familyController.getMembersByFamilyId";
 import createFamilyWithHead from "@salesforce/apex/familyController.createFamilyWithHead";
 import getTransactions from "@salesforce/apex/transactionController.getTransactions";
+import updateLastContributionDate from "@salesforce/apex/transactionController.updateLastContributionDate";
+import checkMonthlyContributions from "@salesforce/apex/memberController.checkMonthlyContributions";
 
 import FAMILY_OBJECT from "@salesforce/schema/Family__c";
 import NAME_FIELD from "@salesforce/schema/Family__c.Name";
@@ -473,16 +475,41 @@ export default class Family extends LightningElement {
     this.showFamilyEditForm = false;
   }
 
-  handleTransactionSuccess() {
+  async handleTransactionSuccess() {
+    await updateLastContributionDate({
+      memberId: this.selectedMemberId
+    });
     console.log("Transaction Created");
-
     this.showModal = false;
     this.addTransactionForm = false;
-
     this.showToast("Success", "Transaction Added Successfully", "success");
   }
 
-  handleSubmit() {
-    console.log("submitting...");
+  async handleTransactionSubmit(event) {
+    event.preventDefault();
+    const fields = event.detail.fields;
+
+    //check only contribution
+
+    if (fields.Type__c === "Contribution") {
+      try {
+        const alreadyContributed = await checkMonthlyContributions({
+          memberId: this.selectedMemberId
+        });
+        if (alreadyContributed) {
+          this.showToast(
+            "Error",
+            "Member already contributed this month",
+            "error"
+          );
+          return;
+        }
+      } catch (error) {
+        console.error(error);
+        console.log("Error:", JSON.stringify(event.detail));
+        return;
+      }
+    }
+    this.template.querySelector("lightning-record-edit-form").submit(fields);
   }
 }

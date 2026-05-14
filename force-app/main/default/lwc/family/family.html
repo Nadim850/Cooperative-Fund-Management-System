@@ -189,19 +189,17 @@
                   </lightning-datatable>
                 </div>
               </template>
-              <!-- view add transaction popup -->
+              <!-- add transaction popup -->
               <template if:true={addTransactionForm}>
                 <lightning-record-edit-form
                   object-api-name="Transaction__c"
                   onsuccess={handleTransactionSuccess}
-                  onsubmit={handleSubmit}
+                  onsubmit={handleTransactionSubmit}
+                  onerror={handleError}
                 >
                   <lightning-input-field field-name="Type__c">
                   </lightning-input-field>
                   <lightning-input-field field-name="Amount__c">
-                  </lightning-input-field>
-
-                  <lightning-input-field field-name="Status__c">
                   </lightning-input-field>
                   <lightning-input-field field-name="Payment_Date__c">
                   </lightning-input-field>
