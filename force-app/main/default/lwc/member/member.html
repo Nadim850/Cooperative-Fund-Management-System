@@ -116,9 +116,43 @@
                     field-name="Address__c"
                   ></lightning-output-field>
                   <lightning-output-field
-                    field-name="Contribution__c"
+                    field-name="Total_Contribution__c"
                   ></lightning-output-field>
                 </lightning-record-view-form>
+              </template>
+              <!-- view add transaction popup -->
+              <template if:true={addTransactionForm}>
+                <lightning-record-edit-form
+                  object-api-name="Transaction__c"
+                  onsuccess={handleTransactionSuccess}
+                  onsubmit={handleSubmit}
+                >
+                  <lightning-input-field field-name="Type__c">
+                  </lightning-input-field>
+                  <lightning-input-field field-name="Amount__c">
+                  </lightning-input-field>
+
+                  <lightning-input-field field-name="Status__c">
+                  </lightning-input-field>
+                  <lightning-input-field field-name="Payment_Date__c">
+                  </lightning-input-field>
+                  <lightning-input-field
+                    field-name="Member__c"
+                    value={selectedMemberId}
+                  >
+                  </lightning-input-field>
+                  <div class="slds-m-top_medium">
+                    <lightning-button
+                      type="submit"
+                      label="save"
+                      variant="brand"
+                    ></lightning-button>
+                    <lightning-button
+                      label="cancel"
+                      onclick={handleCloseTransactionModal}
+                    ></lightning-button>
+                  </div>
+                </lightning-record-edit-form>
               </template>
             </div>
 

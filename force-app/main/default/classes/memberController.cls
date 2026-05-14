@@ -11,11 +11,10 @@ public with sharing class memberController {
 
     return result;
   }
-
   @AuraEnabled(cacheable=true)
   public static List<Member__c> getMember() {
-    return [SELECT Id, Name FROM Member__c];
-  }
+    return [SELECT Id, Name, Email__c, Phone__c, Address_c, Total_Contribution__c FROM Member__c WHERE Id =:memberId];
+  },
 
   @AuraEnabled
   public static void delMember(String memberId) {
@@ -45,5 +44,21 @@ public with sharing class memberController {
     } catch (Exception e) {
       throw new AuraHandledException(e.getMessage());
     }
+  }
+
+  //check contribution validation
+  @AuraEnabled
+  public static Boolean checkMonthlyContributions (Id memberId) {
+
+    List<Transaction__c> transactions = [
+       SELECT Id
+        FROM Transaction__c
+        WHERE Member__c = :memberId
+        AND Type__c = 'Contribution'
+        AND CALENDAR_MONTH(CreatedDate) = :System.today().month()
+        AND CALENDAR_YEAR(CreatedDate) = :System.today().year()
+        LIMIT 1
+    ];
+    return transactions.size() > 0;
   }
 }

@@ -5,9 +5,10 @@ import LightningConfirm from "lightning/confirm";
 
 import getMember from "@salesforce/apex/memberController.getMember";
 import findMember from "@salesforce/apex/memberController.findMember";
+import checkMonthlyContribution from "@salesforce/apex/memberController.checkMonthlyContribution";
+
 import delMember from "@salesforce/apex/memberController.delMember";
 import delMultiMember from "@salesforce/apex/memberController.delMultiMember";
-
 import MEMBER_OBJECT from "@salesforce/schema/Member__c";
 import MEMBER_NAME from "@salesforce/schema/Member__c.Name";
 import MEMBER_ADDRESS from "@salesforce/schema/Member__c.Address__c";

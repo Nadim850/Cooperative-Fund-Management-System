@@ -196,10 +196,11 @@
                   onsuccess={handleTransactionSuccess}
                   onsubmit={handleSubmit}
                 >
-                  <lightning-input-field field-name="Amount__c">
-                  </lightning-input-field>
                   <lightning-input-field field-name="Type__c">
                   </lightning-input-field>
+                  <lightning-input-field field-name="Amount__c">
+                  </lightning-input-field>
+
                   <lightning-input-field field-name="Status__c">
                   </lightning-input-field>
                   <lightning-input-field field-name="Payment_Date__c">
@@ -230,6 +231,30 @@
                   key-field="Id"
                 >
                 </lightning-datatable>
+              </template>
+              <!-- show member detail form -->
+              <template if:true={showMemberDetail}>
+                <lightning-record-view-form
+                  record-id={selectedMemberId}
+                  object-api-name="Member__c"
+                  onerror={handleError}
+                >
+                  <lightning-output-field
+                    field-name="Name"
+                  ></lightning-output-field>
+                  <lightning-output-field
+                    field-name="Email__c"
+                  ></lightning-output-field>
+                  <lightning-output-field
+                    field-name="Phone__c"
+                  ></lightning-output-field>
+                  <lightning-output-field
+                    field-name="Address__c"
+                  ></lightning-output-field>
+                  <lightning-output-field
+                    field-name="Total_Contribution__c"
+                  ></lightning-output-field>
+                </lightning-record-view-form>
               </template>
             </div>
 
