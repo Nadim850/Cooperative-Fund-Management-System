@@ -49,7 +49,7 @@ public with sharing class familyController {
   @AuraEnabled(cacheable=true)
   public static List<Member__c> getMembersByFamilyId(Id familyId) {
     return [
-      SELECT Id, Name, Address__c, Family__c, Email__c
+      SELECT Id, Name, Address__c, Family__c, Email__c, Total_Contribution__c
       FROM Member__c
       WHERE Family__c = :familyId
     ];

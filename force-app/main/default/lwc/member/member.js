@@ -180,7 +180,7 @@ export default class Member extends LightningElement {
     this.showModal = true;
     this.showMemberForm = false;
     this.showMemberDetail = true;
-    this.addTransactionForm = true;
+    this.addTransactionForm = false;
   }
   handleAddTransactions(row) {
     this.modalTitle = "Add Transaction";

@@ -21,7 +21,6 @@ import MEMBER_NAME from "@salesforce/schema/Member__c.Name";
 import MEMBER_ADDRESS from "@salesforce/schema/Member__c.Address__c";
 import MEMBER_PHONE from "@salesforce/schema/Member__c.Phone__c";
 import FAMILY_FIELD from "@salesforce/schema/Member__c.Family__c";
-
 const COLUMNS = [
   { label: "Family Name", fieldName: "Name", type: "text" },
   { label: "Head", fieldName: "headName", type: "text" },
@@ -42,7 +41,7 @@ const MEMBER_TABLE = [
   { label: "Name", fieldName: "Name", type: "text" },
   {
     label: "Total Contribution",
-    fieldName: "totalContribution",
+    fieldName: "Total_Contribution__c",
     type: "currency",
     typeAttributes: {
       currencyCode: "INR"
@@ -96,11 +95,13 @@ export default class Family extends LightningElement {
   showModal = false;
   isSaving = false;
   memberOptions = [];
+  transactions = [];
   selectedHeadId;
   addTransactionForm = false;
   showTransactionTable = false;
   showMemberDetail = false;
-  transactions = [];
+  showMemberDrawer = false;
+  selectedMember;
 
   //Head logic
   familyName = "";
@@ -210,14 +211,12 @@ export default class Family extends LightningElement {
   }
 
   async handleView(row) {
-    console.log("handleView CALLED", row.Id);
     this.isLoading = true;
     this.filteredMembers = [];
     this.showMemberTable = false;
     this.showMemberCreationForm = false;
     this.showMemberDetail = false;
     this.showFamilyEditForm = false;
-
     this.addTransactionForm = false;
     this.showTransactionTable = false;
     this.showModal = false;
@@ -248,32 +247,7 @@ export default class Family extends LightningElement {
       this.isLoading = false;
     }
   }
-  async handleDelete(row) {
-    //confirmation before deleting
-    await LightningConfirm.open({
-      message: `Are you sure you want to delete ${row.Name} From families`,
-      variant: "header",
-      label: "Confirm Deletion"
-    })
-      .then((result) => {
-        //only if user click okay
-        if (result) {
-          delFamily({ familyId: row.Id }).then(() => {
-            this.allFamilies = this.allFamilies.filter(
-              (fam) => fam.Id !== row.Id
-            );
-            this.showToast(
-              "Deleted",
-              `Family Deleted successfully ${row.Name}`,
-              "success"
-            );
-          });
-        }
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }
+
   async handleEdit(row) {
     this.selectedFamilyId = row.Id;
     this.selectedHeadId = row.Head__c;
@@ -423,7 +397,6 @@ export default class Family extends LightningElement {
         this.handleDelete(row);
         break;
       case "add_transaction":
-        console.log(actionName);
         this.handleAddTransactions(row);
         break;
       case "view_transaction":
@@ -433,6 +406,50 @@ export default class Family extends LightningElement {
       default:
     }
   }
+  handleViewMember(row) {
+    console.log(row);
+
+    this.modalTitle = row.Name;
+    this.selectedMemberId = row.Id;
+    this.showModal = true;
+    this.showMemberDetail = true;
+    this.showTransactionTable = false;
+    this.showMemberTable = false;
+    this.showFamilyTable = false;
+    this.showFamilyEditForm = false;
+
+    // this.showMemberDrawer = true;
+    // this.selectedMember = row;
+  }
+  // closeDrawer() {
+  //   this.showMemberDrawer = false;
+  // }
+  async handleDelete(row) {
+    //confirmation before deleting
+    await LightningConfirm.open({
+      message: `Are you sure you want to delete ${row.Name} From families`,
+      variant: "header",
+      label: "Confirm Deletion"
+    })
+      .then((result) => {
+        //only if user click okay
+        if (result) {
+          delFamily({ familyId: row.Id }).then(() => {
+            this.allFamilies = this.allFamilies.filter(
+              (fam) => fam.Id !== row.Id
+            );
+            this.showToast(
+              "Deleted",
+              `Family Deleted successfully ${row.Name}`,
+              "success"
+            );
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }
   handleAddTransactions(row) {
     this.modalTitle = "Add Transaction";
     this.selectedMemberId = row.Id;
@@ -441,7 +458,6 @@ export default class Family extends LightningElement {
     this.showMemberTable = false;
     console.log("add transaction clicked");
   }
-
   async handleShowTransactions(row) {
     this.showMemberTable = false;
     try {
@@ -462,17 +478,6 @@ export default class Family extends LightningElement {
     } catch (error) {
       console.error(error);
     }
-  }
-  handleViewMember(row) {
-    console.log(row);
-
-    this.modalTitle = row.Name;
-    this.showModal = true;
-    this.showMemberDetail = true;
-    this.showTransactionTable = false;
-    this.showMemberTable = false;
-    this.showFamilyTable = false;
-    this.showFamilyEditForm = false;
   }
 
   async handleTransactionSuccess() {

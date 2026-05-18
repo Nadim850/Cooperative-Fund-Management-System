@@ -21,7 +21,7 @@ public with sharing class transactionController {
   public static void updateLastContributionDate(Id memberId) {
     Member__c member = new Member__c(
       Id = memberId,
-      CreatedDate = System.today()
+      Last_Contribution_Date__c = System.today()
     );
     update member;
   }
