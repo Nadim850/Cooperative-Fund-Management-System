@@ -1,1 +1,59 @@
-<template> </template>
+<template>
+  <div class="loan-card">
+    <h1 class="title">Loan Management</h1>
+
+    <lightning-combobox
+      label="Select Member"
+      value={selectedMemberId}
+      options={memberOptions}
+      onchange={handleMemberChange}
+    >
+    </lightning-combobox>
+
+    <template if:true={isEligible}>
+      <div class="success">Member is eligible for loan</div>
+
+      <lightning-input
+        type="number"
+        label="Loan Amount"
+        value={loanAmount}
+        onchange={handleLoanAmount}
+      >
+      </lightning-input>
+
+      <lightning-input
+        type="number"
+        label="Duration (Months)"
+        value={durationMonths}
+        onchange={handleDuration}
+      >
+      </lightning-input>
+
+      <lightning-button
+        label="Calculate EMI"
+        variant="brand"
+        onclick={calculateLoan}
+      >
+      </lightning-button>
+    </template>
+
+    <template if:false={isEligible}>
+      <div class="danger">Member must contribute ₹6000 or more.</div>
+    </template>
+
+    <template if:true={showSummary}>
+      <div class="summary">
+        <p>Total Payable: ₹{totalPayable}</p>
+        <p>Monthly EMI: ₹{emiAmount}</p>
+
+        <lightning-button
+          label="Approve Loan"
+          variant="success"
+          onclick={saveLoan}
+          onerror={handleError}
+        >
+        </lightning-button>
+      </div>
+    </template>
+  </div>
+</template>
